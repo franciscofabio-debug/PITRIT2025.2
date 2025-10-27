@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plano Individual de Trabalho Docente (PIT)</title>
+    <!-- Carrega o Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Carrega a biblioteca de ícones Lucide -->
+    <script src="https://unpkg.com/lucide@latest/dist/lucide.min.js"></script>
+    <style>
+        /* Fonte Inter */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f3f4f6; /* cinza claro de fundo */
+        }
+        /* Estilo para inputs numéricos */
+        input[type="number"] {
+            -moz-appearance: textfield;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        
+        .action-btn {
+             @apply text-white px-4 py-2 rounded-lg shadow-lg transition-all duration-150 ease-in-out;
+             @apply flex items-center justify-center gap-2 text-sm font-semibold transform border-b-4;
+             @apply hover:-translate-y-0.5 hover:shadow-md;
+             @apply active:shadow-inner active:translate-y-0 active:border-b-2;
+        }
+
+        /* Estilo para o botão de adicionar */
+        .add-btn {
+            @apply bg-blue-600 text-white px-4 py-2 rounded-lg shadow-lg transition-all duration-150 ease-in-out;
+            @apply hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50;
+            @apply flex items-center justify-center gap-2 font-semibold transform border-b-4 border-blue-800;
+            @apply hover:-translate-y-0.5 hover:shadow-md;
+            @apply active:shadow-inner active:translate-y-0 active:border-b-2 active:bg-blue-700;
+        }
+        /* Estilo para o botão de remover */
+        .remove-btn {
+            @apply bg-red-500 text-white p-2 rounded-full shadow-md transition-all duration-150 ease-in-out;
+            @apply hover:bg-red-600 focus:outline-none focus:ring-2 focus:ring-red-400;
+            @apply flex items-center justify-center transform border-b-4 border-red-700;
+            @apply hover:-translate-y-0.5 hover:shadow-sm;
+            @apply active:shadow-inner active:translate-y-0 active:border-b-2 active:bg-red-600;
+        }
+        /* Estilo dos cards de seção */
+        .section-card {
+            @apply bg-white p-6 rounded-lg shadow-lg mb-8;
+        }
+        /* Estilo dos títulos das seções */
+        .section-title {
+            @apply text-xl font-bold text-gray-800 border-b-2 border-blue-600 pb-2 mb-6;
+        }
+        /* Estilo dos inputs */
+        .form-input {
+            @apply w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm;
+            @apply focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent;
+        }
+        /* Estilo do subtotal */
+        .subtotal-display {
+            @apply text-right text-lg font-bold text-gray-700 mt-4 pt-4 border-t;
+        }
+        /* Estilo para os ícones */
+        .icon {
+            width: 20px;
+            height: 20px;
+        }
+
+        /* Classes para impressão */
+        .no-print {
+            @media print {
+                display: none !important;
+            }
+        }
+
+        @media print {
+            body {
+                font-family: 'Times New Roman', Times, serif;
+                background-color: #ffffff;
+                color: #000000;
+                margin: 0;
+                padding: 0;
+            }
+            .max-w-4xl {
+                max-width: 100%;
+                box-shadow: none;
+                padding: 0;
+                margin: 0;
+            }
+            .section-card {
+                box-shadow: none;
+                border: 1px solid #ccc;
+                padding: 12px;
+                margin-bottom: 16px;
+                page-break-inside: avoid;
+            }
+            .form-input {
+                border: none !important;
+                box-shadow: none !important;
+                padding: 2px 0;
+                font-size: 11pt;
+                color: #000;
+                background: #fff;
+                /* Adiciona uma linha inferior leve para parecer um formulário preenchido */
+                border-bottom: 1px dotted #888 !important;
+                border-radius: 0;
+            }
+            /* Esconde placeholders na impressão */
+            .form-input::placeholder {
+                color: transparent;
+            }
+             /* Estilo para inputs numéricos na impressão */
+            input[type="number"].form-input {
+                text-align: left;
+                padding-left: 0;
+                width: auto !important;
+                min-width: 40px;
+                 border-bottom: 1px dotted #888 !important;
+            }
+            .item-row {
+                padding: 8px 0;
+                border: none;
+                gap: 8px;
+            }
+            .section-title {
+                font-size: 14pt;
+                font-weight: bold;
+                color: #000;
+                border-bottom: 2px solid #000;
+                padding-bottom: 4px;
+                margin-bottom: 12px;
+            }
+            header, footer {
+                text-align: center;
+            }
+            h1 {
+                font-size: 16pt;
+                font-weight: bold;
+                color: #000;
+            }
+            /* Ajusta a tabela de resumo */
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                font-size: 11pt;
+            }
+            th, td {
+                border: 1px solid #000;
+                padding: 4px 6px;
+                color: #000;
+            }
+            thead tr {
+                background-color: #eee !important;
+            }
+            tfoot tr {
+                background-color: #ddd !important;
+            }
+            tfoot td {
+                font-weight: bold;
+            }
+            /* Oculta o input da Unidade Acadêmica e mostra o texto */
+            #prof-unidade {
+                 border-bottom: 1px dotted #888 !important;
+            }
+            #header-unidade-input {
+                display: none;
+            }
+            #header-unidade-print {
+                display: inline-block !important;
+                font-weight: bold;
+                min-width: 150px;
+                border-bottom: 1px solid #000;
+                padding: 0 5px;
+            }
+            
+            /* Estilo para o parágrafo de introdução na impressão */
+            #info-docente-form {
+                display: none;
+            }
+            #info-docente-print {
+                display: block !important;
+                font-size: 12pt;
+                line-height: 1.6;
+                text-align: justify;
+                margin-bottom: 20px;
+            }
+            #info-docente-print strong {
+                font-weight: bold;
+                /* Adiciona uma linha pontilhada sutil sob os dados */
+                border-bottom: 1px dotted #000;
+                padding-bottom: 1px;
+            }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+
+    <!-- Mensagem de Status (para salvar, carregar, etc.) -->
+    <div id="status-msg" class="no-print fixed top-5 right-5 bg-green-600 text-white px-5 py-3 rounded-lg shadow-xl transition-all duration-300 opacity-0 z-50">
+        Mensagem de status
+    </div>
+
+    <div class="max-w-4xl mx-auto">
+        <!-- Cabeçalho do Aplicativo -->
+        <header class="text-center mb-10">
+            <h1 class="text-xl md:text-2xl font-bold text-black uppercase">
+                UNIVERSIDADE FEDERAL DE CAMPINA GRANDE<br>
+                CENTRO DE FORMAÇÃO DE PROFESSORES
+            </h1>
+            
+            <h2 class="text-2xl md:text-3xl font-bold text-blue-700 mt-6">Plano Individual de Trabalho Docente (PIT)</h2>
+            <p class="text-lg text-gray-600 mt-2 no-print">Preencha os campos abaixo para gerar seu plano</p>
+        </header>
+
+        <!-- Controles de Salvar/Carregar/Imprimir -->
+        <div class="section-card no-print">
+             <h2 class="text-lg font-semibold text-gray-800 mb-3">Opções do Documento</h2>
+             <p class="text-sm text-gray-600 mb-4">Seu progresso é salvo no navegador deste computador. Use os botões abaixo para gerenciar.</p>
+             <div class="flex flex-wrap gap-3">
+                <button id="save-btn" onclick="saveData()" class="action-btn bg-green-600 border-green-800 hover:bg-green-700">
+                    <i data-lucide="save" class="icon"></i> Salvar Progresso
+                </button>
+                <button id="load-btn" onclick="loadData()" class="action-btn bg-blue-600 border-blue-800 hover:bg-blue-700">
+                    <i data-lucide="folder-open" class="icon"></i> Carregar Salvo
+                </button>
+                 <button id="clear-btn" onclick="clearData()" class="action-btn bg-yellow-600 border-yellow-800 hover:bg-yellow-700">
+                    <i data-lucide="file-x-2" class="icon"></i> Limpar Dados
+                </button>
+                <button id="print-btn" onclick="prepareAndPrint()" class="action-btn bg-gray-700 border-gray-900 hover:bg-gray-800 ml-auto">
+                    <i data-lucide="printer" class="icon"></i> Imprimir / Gerar PDF
+                </button>
+             </div>
+        </div>
+
+        <!-- Seção de Informações Iniciais -->
+        <div class="section-card" id="info-docente">
+            <h2 class="section-title">Informações do Docente</h2>
+            
+            <!-- Parágrafo formatado apenas para impressão -->
+            <div id="info-docente-print" style="display: none;">
+                <p id="info-docente-print-content"></p>
+            </div>
+
+            <!-- Formulário para preenchimento -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="info-docente-form">
+                <div>
+                    <label for="prof-nome" class="block text-sm font-medium text-gray-700 mb-1">Professor(a)</label>
+                    <input type="text" id="prof-nome" class="form-input" placeholder="Nome completo">
+                </div>
+                <div>
+                    <label for="prof-siape" class="block text-sm font-medium text-gray-700 mb-1">Matrícula SIAPE</label>
+                    <input type="text" id="prof-siape" class="form-input" placeholder="Nº da Matrícula">
+                </div>
+                <div>
+                    <label for="prof-unidade" class="block text-sm font-medium text-gray-700 mb-1">Unidade Acadêmica (Lotação)</label>
+                    <input type="text" id="prof-unidade" class="form-input" placeholder="Ex: Unidade Acadêmica de Enfermagem">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="prof-regime" class="block text-sm font-medium text-gray-700 mb-1">Regime</label>
+                        <input type="text" id="prof-regime" class="form-input" placeholder="Ex: T-40/DE">
+                    </div>
+                    <div>
+                        <label for="prof-periodo" class="block text-sm font-medium text-gray-700 mb-1">Período Letivo</label>
+                        <input type="text" id="prof-periodo" class="form-input" placeholder="Ex: 2025.1">
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seções Dinâmicas -->
+        
+        <!-- 1. ATIVIDADES DE ENSINO -->
+        <div class="section-card" data-section="ensino">
+            <h2 class="section-title">1. Atividades de Ensino de Graduação e/ou Pós-Graduação</h2>
+            <div id="ensino-list" class="space-y-4">
+                <!-- Itens adicionados dinamicamente aqui -->
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button onclick="addItem('ensino')" class="add-btn no-print">
+                    <i data-lucide="plus-circle" class="icon"></i>
+                    Adicionar Atividade
+                </button>
+                <div id="ensino-subtotal" class="subtotal-display">CH Semanal: 0</div>
+            </div>
+        </div>
+
+        <!-- 2. ATIVIDADES DE PESQUISA -->
+        <div class="section-card" data-section="pesquisa">
+            <h2 class="section-title">2. Atividades de Pesquisa</h2>
+            <div id="pesquisa-list" class="space-y-4">
+                <!-- Itens adicionados dinamicamente aqui -->
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button onclick="addItem('pesquisa')" class="add-btn no-print">
+                    <i data-lucide="plus-circle" class="icon"></i>
+                    Adicionar Pesquisa
+                </button>
+                <div id="pesquisa-subtotal" class="subtotal-display">CH Semanal: 0</div>
+            </div>
+        </div>
+
+        <!-- 3. ATIVIDADES DE EXTENSÃO -->
+        <div class="section-card" data-section="extensao">
+            <h2 class="section-title">3. Atividades de Extensão</h2>
+            <div id="extensao-list" class="space-y-4">
+                <!-- Itens adicionados dinamicamente aqui -->
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button onclick="addItem('extensao')" class="add-btn no-print">
+                    <i data-lucide="plus-circle" class="icon"></i>
+                    Adicionar Extensão
+                </button>
+                <div id="extensao-subtotal" class="subtotal-display">CH Semanal: 0</div>
+            </div>
+        </div>
+
+        <!-- 4. ATIVIDADES ADMINISTRATIVAS -->
+        <div class="section-card" data-section="administrativo">
+            <h2 class="section-title">4. Atividades Administrativas e de Representação</h2>
+            <div id="administrativo-list" class="space-y-4">
+                <!-- Itens adicionados dinamicamente aqui -->
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button onclick="addItem('administrativo')" class="add-btn no-print">
+                    <i data-lucide="plus-circle" class="icon"></i>
+                    Adicionar Atividade
+                </button>
+                <div id="administrativo-subtotal" class="subtotal-display">CH Semanal: 0</div>
+            </div>
+        </div>
+
+        <!-- 5. ATIVIDADES DE MONITORIA -->
+        <div class="section-card" data-section="monitoria">
+            <h2 class="section-title">5. Atividades de Monitoria Acadêmica</h2>
+            <div id="monitoria-list" class="space-y-4">
+                <!-- Itens adicionados dinamicamente aqui -->
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button onclick="addItem('monitoria')" class="add-btn no-print">
+                    <i data-lucide="plus-circle" class="icon"></i>
+                    Adicionar Monitoria
+                </button>
+                <div id="monitoria-subtotal" class="subtotal-display">CH Semanal: 0</div>
+            </div>
+        </div>
+
+        <!-- 6. ORIENTAÇÃO DE TCC -->
+        <div class="section-card" data-section="tcc">
+            <h2 class="section-title">6. Orientação de Trabalho de Conclusão de Curso</h2>
+            <div id="tcc-list" class="space-y-4">
+                <!-- Itens adicionados dinamicamente aqui -->
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button onclick="addItem('tcc')" class="add-btn no-print">
+                    <i data-lucide="plus-circle" class="icon"></i>
+                    Adicionar Orientação
+                </button>
+                <div id="tcc-subtotal" class="subtotal-display">CH Semanal: 0</div>
+            </div>
+        </div>
+
+        <!-- 7. PRODUÇÃO INTELECTUAL -->
+        <div class="section-card" data-section="producao">
+            <h2 class="section-title">7. Atividades de Produção Intelectual</h2>
+            <div id="producao-list" class="space-y-4">
+                <!-- Itens adicionados dinamicamente aqui -->
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button onclick="addItem('producao')" class="add-btn no-print">
+                    <i data-lucide="plus-circle" class="icon"></i>
+                    Adicionar Produção
+                </button>
+                <div id="producao-subtotal" class="subtotal-display">CH Semanal: 0</div>
+            </div>
+        </div>
+
+        <!-- 8. OUTRAS ATIVIDADES -->
+        <div class="section-card" data-section="outras">
+            <h2 class="section-title">8. Outras Atividades</h2>
+            <div id="outras-list" class="space-y-4">
+                <!-- Itens adicionados dinamicamente aqui -->
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button onclick="addItem('outras')" class="add-btn no-print">
+                    <i data-lucide="plus-circle" class="icon"></i>
+                    Adicionar Atividade
+                </button>
+                <div id="outras-subtotal" class="subtotal-display">CH Semanal: 0</div>
+            </div>
+        </div>
+
+        <!-- 9. ATIVIDADES REMOTAS -->
+        <div class="section-card" data-section="remoto">
+            <h2 class="section-title">9. Atividades Pedagógicas Remotas por Teletrabalho</h2>
+            <div id="remoto-list" class="space-y-4">
+                <!-- Itens adicionados dinamicamente aqui -->
+            </div>
+            <div class="flex justify-between items-center mt-6">
+                <button onclick="addItem('remoto')" class="add-btn no-print">
+                    <i data-lucide="plus-circle" class="icon"></i>
+                    Adicionar Atividade
+                </button>
+                <div id="remoto-subtotal" class="subtotal-display">CH Semanal: 0</div>
+            </div>
+        </div>
+
+
+        <!-- Resumo Final -->
+        <div class="section-card bg-blue-50 border-l-4 border-blue-600">
+            <h2 class="text-2xl font-bold text-blue-800 mb-6">Carga Horária Semanal Total das Atividades</h2>
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-300">
+                    <thead class="bg-blue-100">
+                        <tr>
+                            <th class="px-4 py-3 text-left text-sm font-semibold text-blue-900 uppercase tracking-wider">Atividade</th>
+                            <th class="px-4 py-3 text-right text-sm font-semibold text-blue-900 uppercase tracking-wider">CH Semanal</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
+                        <!-- Linhas do Resumo -->
+                        <tr id="resumo-ensino">
+                            <td class="px-4 py-3 text-sm text-gray-700">1. Ensino</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 font-medium text-right" data-total-sum>0</td>
+                        </tr>
+                        <tr id="resumo-pesquisa">
+                            <td class="px-4 py-3 text-sm text-gray-700">2. Pesquisa</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 font-medium text-right" data-total-sum>0</td>
+                        </tr>
+                        <tr id="resumo-extensao">
+                            <td class="px-4 py-3 text-sm text-gray-700">3. Extensão</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 font-medium text-right" data-total-sum>0</td>
+                        </tr>
+                        <tr id="resumo-administrativo">
+                            <td class="px-4 py-3 text-sm text-gray-700">4. Administrativas</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 font-medium text-right" data-total-sum>0</td>
+                        </tr>
+                        <tr id="resumo-monitoria">
+                            <td class="px-4 py-3 text-sm text-gray-700">5. Monitoria</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 font-medium text-right" data-total-sum>0</td>
+                        </tr>
+                        <tr id="resumo-tcc">
+                            <td class="px-4 py-3 text-sm text-gray-700">6. Orientação TCC</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 font-medium text-right" data-total-sum>0</td>
+                        </tr>
+                        <tr id="resumo-producao">
+                            <td class="px-4 py-3 text-sm text-gray-700">7. Produção Intelectual</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 font-medium text-right" data-total-sum>0</td>
+                        </tr>
+                        <tr id="resumo-outras">
+                            <td class="px-4 py-3 text-sm text-gray-700">8. Outras Atividades</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 font-medium text-right" data-total-sum>0</td>
+                        </tr>
+                        <tr id="resumo-remoto">
+                            <td class="px-4 py-3 text-sm text-gray-700">9. Atividades Remotas</td>
+                            <td class="px-4 py-3 text-sm text-gray-900 font-medium text-right" data-total-sum>0</td>
+                        </tr>
+                    </tbody>
+                    <!-- Total Geral -->
+                    <tfoot class="bg-blue-200">
+                        <tr>
+                            <td class="px-4 py-4 text-left text-base font-bold text-blue-900 uppercase">Total Geral</td>
+                            <td id="total-geral" class="px-4 py-4 text-right text-base font-bold text-blue-900">0</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Seção de Assinatura para Impressão -->
+        <div class="section-card" style="display: none;" id="print-footer">
+            <div class="mt-16 text-center">
+                <div class="inline-block border-t-2 border-black w-72 mt-2 pt-1">
+                    Assinatura do Docente
+                </div>
+            </div>
+        </div>
+
+        <footer class="text-center mt-10 text-gray-500 text-sm no-print">
+            Aplicativo de PIT gerado com base no modelo da UFCG.
+        </footer>
+    </div>
+
+    <script>
+        // Chave para o localStorage
+        const STORAGE_KEY = 'pitAppData';
+
+        // Inicializa os ícones do Lucide
+        window.onload = function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            } else {
+                console.error("Biblioteca Lucide não carregada. Verifique a conexão ou o link do script.");
+            }
+            // Tenta carregar dados automaticamente ao abrir a página
+            // loadData(true); // true para carregamento silencioso
+        };
+
+        // Mapa para gerar os campos de cada seção
+        const sectionFields = {
+            'ensino': [
+                { name: 'curso', placeholder: 'Curso', type: 'text', width: 'w-full md:w-1/4' },
+                { name: 'disciplina', placeholder: 'Disciplina(s)', type: 'text', width: 'w-full md:w-2/4' },
+                { name: 'ch_aula', placeholder: 'CH Aula (Semanal)', type: 'number', width: 'w-full md:w-1/4' },
+                { name: 'ch_total', placeholder: 'CH Total (x2)', type: 'number', width: 'w-full md:w-1/4', readonly: true }
+            ],
+            'pesquisa': [
+                { name: 'tipo', placeholder: 'Projeto (PIBIC, PIVIC, Outros)', type: 'text', width: 'w-full md:w-1/4' },
+                { name: 'titulo', placeholder: 'Título da Pesquisa', type: 'text', width: 'w-full md:w-3/4' },
+                { name: 'ch', placeholder: 'CH', type: 'number', width: 'w-full md:w-1/4' }
+            ],
+            'extensao': [
+                { name: 'tipo', placeholder: 'Projeto (Probex, Outros)', type: 'text', width: 'w-full md:w-1/4' },
+                { name: 'funcao', placeholder: 'Função (Coord./Orient.)', type: 'text', width: 'w-full md:w-1/4' },
+                { name: 'titulo', placeholder: 'Título do Projeto', type: 'text', width: 'w-full md:w-2/4' },
+                { name: 'ch', placeholder: 'CH', type: 'number', width: 'w-full md:w-1/4' }
+            ],
+            'administrativo': [
+                { name: 'atividade', placeholder: 'Função/Atividade', type: 'text', width: 'w-full' },
+                { name: 'ch', placeholder: 'CH', type: 'number', width: 'w-full md:w-1/4' }
+            ],
+            'monitoria': [
+                { name: 'titulo', placeholder: 'Título do Projeto', type: 'text', width: 'w-full md:w-3/4' },
+                { name: 'monitores', placeholder: 'Nº Monitores', type: 'number', width: 'w-full md:w-1/4' },
+                { name: 'ch', placeholder: 'CH', type: 'number', width: 'w-full md:w-1/4' }
+            ],
+            'tcc': [
+                { name: 'natureza', placeholder: 'Natureza (Dissertação, Tese)', type: 'text', width: 'w-full md:w-1/4' },
+                { name: 'titulo', placeholder: 'Orientando/Título', type: 'text', width: 'w-full md:w-3/4' },
+                { name: 'ch', placeholder: 'CH', type: 'number', width: 'w-full md:w-1/4' }
+            ],
+            'producao': [
+                { name: 'natureza', placeholder: 'Natureza (Bibliográfica, Técnica)', type: 'text', width: 'w-full md:w-1/4' },
+                { name: 'titulo', placeholder: 'Título da Produção', type: 'text', width: 'w-full md:w-3/4' },
+                { name: 'ch', placeholder: 'CH', type: 'number', width: 'w-full md:w-1/4' }
+            ],
+            'outras': [
+                { name: 'atividade', placeholder: 'Tipo de Atividade', type: 'text', width: 'w-full' },
+                { name: 'ch', placeholder: 'CH', type: 'number', width: 'w-full md:w-1/4' }
+            ],
+            'remoto': [
+                { name: 'periodo', placeholder: 'Período/Data', type: 'text', width: 'w-full md:w-1/4' },
+                { name: 'atividade', placeholder: 'Atividade', type: 'text', width: 'w-full md:w-2/4' },
+                { name: 'ferramenta', placeholder: 'Ferramenta', type: 'text', width: 'w-full md:w-1/4' },
+                { name: 'ch', placeholder: 'CH', type: 'number', width: 'w-full md:w-1/4' }
+            ]
+        };
+
+        // Função para adicionar um novo item a uma seção
+        // Adiciona um parâmetro 'data' opcional para preenchimento ao carregar
+        function addItem(sectionId, data = null) {
+            const list = document.getElementById(`${sectionId}-list`);
+            const fields = sectionFields[sectionId];
+            
+            const item = document.createElement('div');
+            item.className = 'item-row p-4 border rounded-lg bg-gray-50 flex flex-wrap md:flex-nowrap items-start gap-3';
+
+            const inputsContainer = document.createElement('div');
+            inputsContainer.className = 'flex-grow grid grid-cols-1 md:grid-cols-2 gap-3 w-full';
+            
+            let chAulaInput, chTotalInput;
+
+            fields.forEach(field => {
+                const input = document.createElement('input');
+                input.type = field.type;
+                input.name = field.name;
+                input.placeholder = field.placeholder;
+                input.className = 'form-input'; // Largura agora é controlada pelo wrapper
+                
+                if(field.readonly) input.readOnly = true;
+
+                const wrapper = document.createElement('div');
+                // Lógica de layout baseada no 'width' definido em sectionFields
+                if (field.width === 'w-full md:w-1/4' || field.width === 'w-full md:w-1/4') {
+                    wrapper.className = 'col-span-1';
+                } else if (field.width === 'w-full md:w-2/4' || field.width === 'w-full md:w-3/4') {
+                    wrapper.className = 'col-span-2';
+                } else if (field.width === 'w-full') {
+                    wrapper.className = 'col-span-2';
+                } else {
+                    wrapper.className = 'col-span-1'; // Padrão
+                }
+                // Ajuste específico para 2 campos de texto e 2 numéricos em 'ensino'
+                if (sectionId === 'ensino' && (field.name === 'ch_aula' || field.name === 'ch_total')) {
+                     wrapper.className = 'col-span-1';
+                }
+                if (sectionId === 'ensino' && field.name === 'disciplina') {
+                     wrapper.className = 'col-span-2';
+                }
+
+
+                if (sectionId === 'ensino') {
+                    if (field.name === 'ch_aula') {
+                        chAulaInput = input;
+                        input.value = data ? data[field.name] || "0" : "0";
+                        input.min = "0";
+                        input.addEventListener('input', () => {
+                            const aulaVal = Number(chAulaInput.value) || 0;
+                            if (chTotalInput) chTotalInput.value = aulaVal * 2;
+                            calculateSubtotal(sectionId);
+                        });
+                    } else if (field.name === 'ch_total') {
+                        chTotalInput = input;
+                        const aulaVal = data ? Number(data['ch_aula']) || 0 : 0;
+                        input.value = aulaVal * 2; // Preenche ao carregar
+                    } else {
+                        input.value = data ? data[field.name] || "" : ""; // curso/disciplina
+                    }
+                } else {
+                    // Lógica antiga para outras seções
+                    if (field.type === 'number') {
+                        input.min = "0";
+                        input.value = data ? data[field.name] || "0" : "0";
+                        input.addEventListener('input', () => calculateSubtotal(sectionId));
+                    } else {
+                        input.input.value = data ? data[field.name] || "" : "";
+                    }
+                }
+                
+                wrapper.appendChild(input);
+                inputsContainer.appendChild(wrapper);
+            });
+
+            item.appendChild(inputsContainer);
+
+            const removeBtn = document.createElement('button');
+            removeBtn.className = 'remove-btn ml-2 flex-shrink-0 mt-2 md:mt-0 no-print';
+            removeBtn.innerHTML = '<i data-lucide="trash-2" class="icon"></i>';
+            removeBtn.onclick = () => {
+                item.remove();
+                calculateSubtotal(sectionId);
+            };
+            
+            item.appendChild(removeBtn);
+            list.appendChild(item);
+
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        }
+
+        // Função para calcular o subtotal de uma seção
+        function calculateSubtotal(sectionId) {
+            const list = document.getElementById(`${sectionId}-list`);
+            let subtotal = 0;
+
+            if (sectionId === 'ensino') {
+                const inputs = list.querySelectorAll('input[name="ch_total"]'); // Soma o total calculado
+                inputs.forEach(input => {
+                    subtotal += Number(input.value) || 0;
+                });
+            } else {
+                const inputs = list.querySelectorAll('input[name="ch"]');
+                inputs.forEach(input => {
+                    subtotal += Number(input.value) || 0;
+                });
+            }
+
+            document.getElementById(`${sectionId}-subtotal`).textContent = `CH Semanal: ${subtotal}`;
+            
+            const resumoRow = document.getElementById(`resumo-${sectionId}`);
+            if (resumoRow) {
+                resumoRow.querySelector('td[data-total-sum]').textContent = subtotal;
+            }
+            
+            calculateTotalGeral();
+        }
+
+        // Função para calcular o total geral
+        function calculateTotalGeral() {
+            const allSubtotals = document.querySelectorAll('td[data-total-sum]');
+            let totalGeral = 0;
+            allSubtotals.forEach(td => {
+                totalGeral += Number(td.textContent) || 0;
+            });
+
+            document.getElementById('total-geral').textContent = totalGeral;
+        }
+
+        // --- Funções de Salvar/Carregar ---
+
+        function saveData() {
+            const data = {
+                infoDocente: {},
+                secoes: {}
+            };
+
+            // Salvar informações do docente
+            document.querySelectorAll('#info-docente input').forEach(input => {
+                data.infoDocente[input.id] = input.value;
+            });
+
+            // Salvar seções dinâmicas
+            document.querySelectorAll('div[data-section]').forEach(section => {
+                const sectionId = section.dataset.section;
+                data.secoes[sectionId] = [];
+                section.querySelectorAll('.item-row').forEach(itemRow => {
+                    const itemData = {};
+                    itemRow.querySelectorAll('input').forEach(input => {
+                        itemData[input.name] = input.value;
+                    });
+                    data.secoes[sectionId].push(itemData);
+                });
+            });
+
+            // Salvar no localStorage
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            showStatus('Progresso salvo com sucesso!');
+        }
+
+        function loadData(silent = false) {
+            const dataString = localStorage.getItem(STORAGE_KEY);
+            if (!dataString) {
+                if (!silent) showStatus('Nenhum dado salvo foi encontrado.', 'warn');
+                return;
+            }
+
+            const data = JSON.parse(dataString);
+
+            // Limpa o formulário antes de carregar
+            clearForm();
+
+            // Carregar informações do docente
+            if (data.infoDocente) {
+                Object.keys(data.infoDocente).forEach(id => {
+                    const input = document.getElementById(id);
+                    if (input) {
+                        input.value = data.infoDocente[id];
+                    }
+                });
+            }
+
+            // Carregar seções dinâmicas
+            if (data.secoes) {
+                Object.keys(data.secoes).forEach(sectionId => {
+                    const items = data.secoes[sectionId];
+                    items.forEach(itemData => {
+                        addItem(sectionId, itemData);
+                    });
+                    // Recalcula o subtotal após carregar os itens
+                    calculateSubtotal(sectionId); 
+                });
+            }
+
+            if (!silent) showStatus('Dados carregados com sucesso!');
+        }
+        
+        function clearForm() {
+             // Limpar inputs de info docente
+            document.querySelectorAll('#info-docente input').forEach(input => {
+                input.value = '';
+            });
+            // Limpar listas dinâmicas
+            document.querySelectorAll('div[data-section]').forEach(section => {
+                document.getElementById(`${section.dataset.section}-list`).innerHTML = '';
+                calculateSubtotal(section.dataset.section); // Reseta subtotais
+            });
+        }
+
+        function clearData() {
+            // Removido o 'confirm()' pois não funciona bem em todos os ambientes
+            localStorage.removeItem(STORAGE_KEY);
+            clearForm();
+            showStatus('Dados limpos com sucesso.', 'warn');
+        }
+
+        function prepareAndPrint() {
+            // Copia o valor do input da unidade para o span de impressão (REMOVIDO)
+            // const unidadeInput = document.getElementById('header-unidade');
+            // const unidadePrint = document.getElementById('header-unidade-print');
+            // unidadePrint.textContent = unidadeInput.value || '(NÃO PREENCHIDO)';
+
+            // Preenche o parágrafo de introdução para impressão
+            const nome = document.getElementById('prof-nome').value || '________________';
+            const siape = document.getElementById('prof-siape').value || '________________';
+            const unidade = document.getElementById('prof-unidade').value || '________________';
+            const regime = document.getElementById('prof-regime').value || '________________';
+            const periodo = document.getElementById('prof-periodo').value || '________________';
+            
+            const p = document.getElementById('info-docente-print-content');
+            p.innerHTML = `Eu, professor(a) <strong>${nome}</strong>, matrícula SIAPE nº <strong>${siape}</strong>, lotado(a) na <strong>${unidade}</strong>, regime de trabalho <strong>${regime}</strong> apresento o PIT referente ao período letivo <strong>${periodo}</strong> com as seguintes atividades:`;
+
+
+            // Mostra a seção de assinatura apenas para impressão
+            document.getElementById('print-footer').style.display = 'block';
+
+            // Chama a impressão
+            window.print();
+
+            // Esconde a seção de assinatura após a impressão
+            document.getElementById('print-footer').style.display = 'none';
+        }
+        
+        // Função para mostrar mensagens de status
+        function showStatus(message, type = 'success') {
+            const msgEl = document.getElementById('status-msg');
+            msgEl.textContent = message;
+
+            // Remove classes de cor antigas
+            msgEl.classList.remove('bg-green-600', 'bg-yellow-600', 'bg-red-600');
+
+            // Adiciona nova classe de cor
+            if (type === 'success') {
+                msgEl.classList.add('bg-green-600');
+            } else if (type === 'warn') {
+                msgEl.classList.add('bg-yellow-600');
+            } else {
+                msgEl.classList.add('bg-red-600');
+            }
+
+            msgEl.classList.remove('opacity-0');
+
+            setTimeout(() => {
+                msgEl.classList.add('opacity-0');
+            }, 3000); // Mensagem desaparece após 3 segundos
+        }
+    </script>
+</body>
+</html>
